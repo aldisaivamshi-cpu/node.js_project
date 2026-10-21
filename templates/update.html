@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Task — TaskFlow{% endblock %}
+
+{% block body %}
+<div class="main-content">
+
+    <div class="page-header">
+        <h1>
+            <i class="bi bi-pencil-square" style="color:var(--primary);"></i>
+            Edit Task
+        </h1>
+        <p>Update the details of your task below.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="app-card">
+                <div class="app-card-header">
+                    <div class="icon-badge"><i class="bi bi-pencil"></i></div>
+                    <h2>Update Task</h2>
+                </div>
+                <div class="app-card-body">
+                    <form action="/update/{{ edit_todo.SNo }}" method="POST" id="updateForm">
+
+                        <div class="mb-4">
+                            <label for="todoTitle" class="form-label">Task Title</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="todoTitle"
+                                name="todoTitle"
+                                value="{{ edit_todo.TODO_Title }}"
+                                maxlength="200"
+                                required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="todoDescription" class="form-label">Description</label>
+                            <textarea
+                                class="form-control"
+                                id="todoDescription"
+                                name="todoDescription"
+                                rows="4"
+                                maxlength="500"
+                                required>{{ edit_todo.Description }}</textarea>
+                        </div>
+
+                        <!-- Task metadata info -->
+                        <div style="
+                            background:#f8f7ff; border-radius:10px; padding:12px 14px;
+                            font-size:13px; color:var(--text-muted); margin-bottom:24px;
+                            display:flex; align-items:center; gap:8px;">
+                            <i class="bi bi-clock" style="color:var(--primary);"></i>
+                            Originally added on
+                            <strong>{{ edit_todo.displayDate }}</strong>
+                        </div>
+
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button type="submit" class="btn-primary-custom" id="updateBtn">
+                                <i class="bi bi-check-circle"></i> Save Changes
+                            </button>
+                            <a href="{{ '/todos' }}" class="btn-edit-custom">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Prevent double-submit
+    document.getElementById('updateForm').addEventListener('submit', function() {
+        const btn = document.getElementById('updateBtn');
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving…';
+        btn.disabled = true;
+    });
+</script>
+{% endblock %}

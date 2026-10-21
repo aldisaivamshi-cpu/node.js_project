@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block title %}My TODOs — TaskFlow{% endblock %}
+{% block meta_description %}Manage your personal task list with TaskFlow.{% endblock %}
+
+{% block body %}
+<div class="main-content">
+
+    <div class="page-header">
+        <h1>
+            <i class="bi bi-check2-all" style="color:var(--primary);"></i>
+            My TODOs
+        </h1>
+        <p>Hi, <strong>{{ session.full_name or session.username }}</strong> — here are your tasks for today.</p>
+    </div>
+
+    <!-- ── ADD TODO FORM ──────────────────────────────── -->
+    <div class="app-card">
+        <div class="app-card-header">
+            <div class="icon-badge"><i class="bi bi-plus-lg"></i></div>
+            <h2>Add New Task</h2>
+        </div>
+        <div class="app-card-body">
+            <form action="{{ '/todos' }}" method="POST" id="addTodoForm">
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="todoTitle" class="form-label">Task Title</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="todoTitle"
+                            name="todoTitle"
+                            placeholder="e.g. Buy groceries"
+                            autocomplete="off"
+                            maxlength="200"
+                            required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="todoDescription" class="form-label">Description</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="todoDescription"
+                            name="todoDescription"
+                            placeholder="A short description of this task…"
+                            autocomplete="off"
+                            maxlength="500"
+                            required>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn-primary-custom w-100" id="addTodoBtn">
+                            <i class="bi bi-plus-circle"></i> Add Task
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+
+    <!-- ── TODO LIST ──────────────────────────────────── -->
+    <div class="app-card">
+        <div class="app-card-header" style="justify-content: space-between;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="icon-badge"><i class="bi bi-list-task"></i></div>
+                <h2>Your Tasks</h2>
+            </div>
+            {% if allTODO %}
+            <span style="font-size:13px; color:var(--text-muted); font-weight:600;">
+                {{ allTODO|length }} task{% if allTODO|length != 1 %}s{% endif %}
+            </span>
+            {% endif %}
+        </div>
+        <div class="app-card-body" style="padding:0;">
+
+            {% if allTODO %}
+
+            <div class="table-responsive">
+                <table class="todo-table" id="todoTable">
+                    <thead>
+                        <tr>
+                            <th style="width:52px;">#</th>
+                            <th>Title</th>
+                            <th class="d-none d-md-table-cell">Description</th>
+                            <th class="d-none d-sm-table-cell" style="width:180px;">Added</th>
+                            <th style="width:140px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for todo in allTODO %}
+                        <tr id="row-{{ todo.SNo }}">
+                            <td>
+                                <span class="todo-num">{{ loop.index }}</span>
+                            </td>
+                            <td class="todo-title-cell">{{ todo.TODO_Title }}</td>
+                            <td class="todo-desc-cell d-none d-md-table-cell">{{ todo.Description }}</td>
+                            <td class="d-none d-sm-table-cell">
+                                <span class="time-badge">
+                                    <i class="bi bi-clock me-1"></i>
+                                    {{ todo.displayDate }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-cell">
+                                    <a href="/update/{{ todo.SNo }}"
+                                       class="btn-edit-custom"
+                                       title="Edit task">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                    <a href="/delete/{{ todo.SNo }}"
+                                       class="btn-danger-custom"
+                                       title="Delete task"
+                                       onclick="return confirmDelete(this, '{{ todo.TODO_Title|e }}')">
+                                        <i class="bi bi-trash3"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% else %}
+
+            <div class="empty-state">
+                <div class="empty-icon"><i class="bi bi-clipboard-plus"></i></div>
+                <h3>No tasks yet!</h3>
+                <p>Use the form above to add your first task and start staying organized.</p>
+            </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+<!-- Delete confirmation modal -->
+<div id="deleteModal" style="
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.45);
+    z-index:999; align-items:center; justify-content:center;">
+    <div style="
+        background:#fff; border-radius:16px; padding:32px 28px;
+        max-width:380px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.2);
+        text-align:center;">
+        <div style="font-size:44px; color:#ef4444; margin-bottom:12px;">
+            <i class="bi bi-trash3-fill"></i>
+        </div>
+        <h3 style="font-size:18px; font-weight:700; margin-bottom:8px;">Delete Task?</h3>
+        <p id="deleteModalMsg" style="color:var(--text-muted); font-size:14px; margin-bottom:24px;"></p>
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button onclick="cancelDelete()"
+                style="padding:10px 22px; border-radius:9px; border:1.5px solid #e5e7f3;
+                       background:#fff; color:#74798b; font-weight:600; cursor:pointer; font-family:inherit;">
+                Cancel
+            </button>
+            <a id="deleteConfirmBtn" href="#"
+                style="padding:10px 22px; border-radius:9px; background:#ef4444;
+                       color:#fff; font-weight:600; text-decoration:none;">
+                Yes, Delete
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let pendingDeleteHref = null;
+
+    function confirmDelete(anchor, title) {
+        const modal = document.getElementById('deleteModal');
+        document.getElementById('deleteModalMsg').textContent =
+            'Are you sure you want to delete "' + title + '"? This cannot be undone.';
+        document.getElementById('deleteConfirmBtn').href = anchor.href;
+        modal.style.display = 'flex';
+        return false;
+    }
+
+    function cancelDelete() {
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    // Close modal on backdrop click
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) cancelDelete();
+    });
+</script>
+{% endblock %}

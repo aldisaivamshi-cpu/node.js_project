@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}TaskFlow — Your Personal TODO App{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}TaskFlow helps you organize daily tasks, stay productive, and achieve your goals.{% endblock %}">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        /* ── Design Tokens ──────────────────────────────── */
+        :root {
+            --primary:      #6558e8;
+            --primary-dark: #5143d1;
+            --primary-light:#eae7ff;
+            --success:      #22c55e;
+            --danger:       #ef4444;
+            --warning:      #f59e0b;
+            --bg:           #f4f6ff;
+            --surface:      #ffffff;
+            --border:       #e5e7f3;
+            --text:         #1e2340;
+            --text-muted:   #74798b;
+            --radius:       14px;
+            --shadow:       0 4px 24px rgba(44,42,95,.08);
+            --shadow-lg:    0 12px 40px rgba(44,42,95,.14);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── Navbar ─────────────────────────────────────── */
+        .app-navbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 6%;
+            height: 66px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(44,42,95,.05);
+        }
+
+        .app-navbar .brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 32px;
+            flex-shrink: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 7px 13px;
+            border-radius: 8px;
+            transition: all .2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px 6px 8px;
+            background: var(--primary-light);
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .user-chip .avatar {
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+        }
+
+        .btn-nav {
+            font-size: 13px;
+            font-weight: 600;
+            padding: 7px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-nav-outline {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .btn-nav-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-nav-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-nav-primary:hover {
+            background: var(--primary-dark);
+            color: #fff;
+        }
+
+        /* ── Flash messages ─────────────────────────────── */
+        .flash-area {
+            padding: 12px 6%;
+        }
+
+        .flash-msg {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            animation: slideDown .3s ease;
+        }
+
+        .flash-success { background: #ecfdf5; color: #15803d; border-left: 4px solid var(--success); }
+        .flash-error   { background: #fef2f2; color: #b91c1c; border-left: 4px solid var(--danger); }
+        .flash-info    { background: #eff6ff; color: #1d4ed8; border-left: 4px solid #3b82f6; }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Main content wrapper ───────────────────────── */
+        .main-content {
+            padding: 36px 6%;
+            max-width: 1140px;
+            margin: 0 auto;
+        }
+
+        /* ── Card ───────────────────────────────────────── */
+        .app-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .app-card-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-card-header h2 {
+            font-size: 17px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .app-card-header .icon-badge {
+            width: 36px;
+            height: 36px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .app-card-body { padding: 24px; }
+
+        /* ── Form controls ──────────────────────────────── */
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #41465a;
+            margin-bottom: 7px;
+        }
+
+        .form-control, .form-select {
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 11px 14px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(101,88,232,.14);
+            outline: none;
+        }
+
+        textarea.form-control { resize: vertical; min-height: 100px; }
+
+        /* ── Buttons ────────────────────────────────────── */
+        .btn-primary-custom {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 11px 22px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            text-decoration: none;
+        }
+
+        .btn-primary-custom:hover {
+            background: var(--primary-dark);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(101,88,232,.25);
+        }
+
+        .btn-danger-custom {
+            background: #fef2f2;
+            color: var(--danger);
+            border: 1.5px solid #fecaca;
+            border-radius: 8px;
+            padding: 7px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+        }
+
+        .btn-danger-custom:hover {
+            background: var(--danger);
+            color: #fff;
+            border-color: var(--danger);
+        }
+
+        .btn-edit-custom {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1.5px solid #d5d0f8;
+            border-radius: 8px;
+            padding: 7px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+        }
+
+        .btn-edit-custom:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        /* ── Todo table ─────────────────────────────────── */
+        .todo-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .todo-table thead th {
+            background: #f8f8fd;
+            padding: 12px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .todo-table thead th:first-child { border-radius: 8px 0 0 0; }
+        .todo-table thead th:last-child  { border-radius: 0 8px 0 0; }
+
+        .todo-table tbody tr {
+            transition: background .15s;
+        }
+
+        .todo-table tbody tr:hover {
+            background: #f8f7ff;
+        }
+
+        .todo-table tbody td {
+            padding: 14px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .todo-table tbody tr:last-child td { border-bottom: none; }
+
+        .todo-num {
+            width: 32px;
+            height: 32px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .todo-title-cell { font-weight: 600; }
+
+        .todo-desc-cell {
+            color: var(--text-muted);
+            max-width: 280px;
+        }
+
+        .time-badge {
+            font-size: 12px;
+            color: var(--text-muted);
+            background: #f5f5fc;
+            padding: 4px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .action-cell { white-space: nowrap; display: flex; gap: 8px; }
+
+        /* ── Empty state ────────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 56px 24px;
+        }
+
+        .empty-state .empty-icon {
+            font-size: 52px;
+            color: #d5d0f8;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* ── Page header ────────────────────────────────── */
+        .page-header {
+            margin-bottom: 28px;
+        }
+
+        .page-header h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        /* ── Responsive ─────────────────────────────────── */
+        @media (max-width: 768px) {
+            .app-navbar { padding: 0 5%; }
+            .main-content { padding: 24px 5%; }
+            .nav-links { display: none; }
+            .todo-desc-cell { display: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- ── Navbar ── -->
+    <nav class="app-navbar">
+        <a class="brand" href="{{ '/home' }}">
+            <i class="bi bi-check2-square"></i> TaskFlow
+        </a>
+
+        <ul class="nav-links">
+            <li><a href="{{ '/home' }}" {% if endpoint == 'home' %}class="active"{% endif %}>Home</a></li>
+            {% if session.user_id %}
+            <li><a href="{{ '/todos' }}" {% if endpoint == 'todos' %}class="active"{% endif %}>My TODOs</a></li>
+            {% endif %}
+            <li><a href="{{ '/about' }}" {% if endpoint == 'about' %}class="active"{% endif %}>About</a></li>
+        </ul>
+
+        <div class="nav-right">
+            {% if session.user_id %}
+                <div class="user-chip">
+                    <div class="avatar">
+                        {{ (session.username or 'U')[0] | upper }}
+                    </div>
+                    {{ session.username }}
+                </div>
+                <a href="{{ '/logout' }}" class="btn-nav btn-nav-outline">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            {% else %}
+                <a href="{{ '/login' }}" class="btn-nav btn-nav-outline">
+                    <i class="bi bi-person"></i> Login
+                </a>
+                <a href="{{ '/register' }}" class="btn-nav btn-nav-primary">
+                    <i class="bi bi-person-plus"></i> Register
+                </a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- ── Flash Messages ── -->
+    {% if messages %}
+{% for item in messages %}
+<div class="alert alert-{{ item.category }} alert-dismissible fade show" role="alert">
+  {{ item.message }}
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endif %}
+
+    <!-- ── Main content ── -->
+    {% block body %}{% endblock %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow — Organize Your Day</title>
+    <meta name="description" content="TaskFlow helps you manage daily tasks, stay organized, and achieve your goals.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary:      #6558e8;
+            --primary-dark: #5143d1;
+            --primary-light:#eae7ff;
+            --bg:           #f4f6ff;
+            --surface:      #ffffff;
+            --border:       #e5e7f3;
+            --text:         #1e2340;
+            --text-muted:   #74798b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 6%;
+            height: 66px;
+            box-shadow: 0 2px 12px rgba(44,42,95,.05);
+        }
+
+        .navbar-brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary) !important;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link {
+            color: var(--text-muted) !important;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 7px 13px !important;
+            border-radius: 8px;
+            transition: all .2s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--primary) !important;
+            background: var(--primary-light);
+        }
+
+        .btn-nav-outline {
+            font-size: 13px;
+            font-weight: 600;
+            padding: 7px 16px;
+            border-radius: 8px;
+            border: 1.5px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all .2s;
+        }
+
+        .btn-nav-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-nav-primary {
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 18px;
+            border-radius: 8px;
+            background: var(--primary);
+            color: #fff !important;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all .2s;
+        }
+
+        .btn-nav-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Hero section */
+        .hero {
+            min-height: calc(100vh - 66px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 6%;
+        }
+
+        .hero-grid {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 70px;
+        }
+
+        /* Left content */
+        .hero-content {
+            animation: fadeUp .8s ease both;
+        }
+
+        .tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(34px, 4.2vw, 54px);
+            font-weight: 800;
+            line-height: 1.18;
+            margin-bottom: 20px;
+            letter-spacing: -.02em;
+        }
+
+        .hero-content h1 em {
+            font-style: normal;
+            color: var(--primary);
+        }
+
+        .hero-content p {
+            font-size: 17px;
+            line-height: 1.8;
+            color: var(--text-muted);
+            margin-bottom: 34px;
+            max-width: 460px;
+        }
+
+        .cta-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--primary);
+            color: #fff;
+            text-decoration: none;
+            padding: 15px 28px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            box-shadow: 0 8px 20px rgba(101,88,232,.25);
+            transition: all .25s;
+        }
+
+        .cta-btn:hover {
+            background: var(--primary-dark);
+            color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 14px 30px rgba(101,88,232,.32);
+        }
+
+        .cta-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: color .2s;
+        }
+
+        .cta-secondary:hover { color: var(--primary); }
+
+        .trust-note {
+            margin-top: 24px;
+            font-size: 13px;
+            color: #a0a3b1;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        /* Stats strip */
+        .stats-strip {
+            display: flex;
+            gap: 28px;
+            margin-top: 36px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item { text-align: center; }
+
+        .stat-item .stat-num {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .stat-item .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Right illustration card */
+        .illus-area {
+            position: relative;
+            min-height: 420px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeUp .9s ease .15s both;
+        }
+
+        .bg-circle {
+            position: absolute;
+            width: 370px;
+            height: 370px;
+            background: #e8e5ff;
+            border-radius: 50%;
+            animation: breathe 5s ease-in-out infinite;
+        }
+
+        .demo-card {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 340px;
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 26px;
+            box-shadow: 0 24px 64px rgba(44,42,95,.15);
+            animation: float 5s ease-in-out infinite;
+        }
+
+        .demo-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+
+        .demo-card-head h3 {
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .demo-card-icon {
+            width: 38px;
+            height: 38px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        /* Progress bar */
+        .progress-track {
+            height: 7px;
+            background: #f0efff;
+            border-radius: 99px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6558e8, #8b5cf6);
+            border-radius: 99px;
+            transition: width .5s ease;
+        }
+
+        .progress-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+        }
+
+        /* Demo tasks */
+        .demo-task {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 12px 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .demo-task:hover { background: #faf9ff; transform: translateX(3px); }
+
+        .check-box {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #c9c5ed;
+            border-radius: 6px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            transition: all .2s;
+        }
+
+        .demo-task.done .check-box {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .demo-task.done .check-box::after { content: '✓'; }
+
+        .task-info { flex: 1; }
+        .task-name { font-size: 13px; font-weight: 600; }
+        .task-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        .demo-task.done .task-name {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        /* Floating badges */
+        .float-badge {
+            position: absolute;
+            z-index: 3;
+            width: 52px;
+            height: 52px;
+            background: var(--surface);
+            border-radius: 14px;
+            box-shadow: 0 10px 28px rgba(44,42,95,.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .badge-one { top: 28px; right: 12px; color: #f59e0b; animation: float 3s ease-in-out infinite; }
+        .badge-two { bottom: 30px; left: 0; color: #22c55e; animation: float 3.7s ease-in-out infinite; }
+        .badge-three { top: 72px; left: 8px; color: #ec4899; animation: float 4.4s ease-in-out infinite; }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(-13px); }
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50%       { transform: scale(1.05); }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(28px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar { padding: 0 5%; }
+
+            .hero { padding: 44px 5%; }
+
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 44px;
+            }
+
+            .hero-content { text-align: center; }
+            .hero-content p { margin-left: auto; margin-right: auto; }
+            .cta-group { justify-content: center; }
+            .stats-strip { justify-content: center; }
+
+            .illus-area { min-height: 380px; }
+            .bg-circle { width: 300px; height: 300px; }
+            .demo-card { max-width: 320px; }
+            .badge-one { right: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid px-0">
+
+            <a class="navbar-brand" href="{{ '/home' }}">
+                <i class="bi bi-check2-square"></i> TaskFlow
+            </a>
+
+            <button class="navbar-toggler border-0 shadow-none" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#homeNav"
+                    aria-controls="homeNav"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="homeNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ '/home' }}">Home</a>
+                    </li>
+                    {% if session.user_id %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ '/todos' }}">My TODOs</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ '/about' }}">About</a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+                    {% if session.user_id %}
+                        <span style="font-size:14px; color:var(--text-muted); font-weight:500;">
+                            Hi, {{ session.username }} 👋
+                        </span>
+                        <a href="{{ '/logout' }}" class="btn-nav-outline">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    {% else %}
+                        <a href="{{ '/login' }}" class="btn-nav-outline">
+                            <i class="bi bi-person"></i> Login
+                        </a>
+                        <a href="{{ '/register' }}" class="btn-nav-primary">
+                            <i class="bi bi-person-plus"></i> Get Started
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </nav>
+
+
+    <!-- Flash messages -->
+    {% if messages %}
+{% for item in messages %}
+<div class="alert alert-{{ item.category }} alert-dismissible fade show" role="alert">
+  {{ item.message }}
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endif %}
+
+
+    <!-- Hero -->
+    <main class="hero">
+        <div class="hero-grid">
+
+            <!-- Left: Content -->
+            <section class="hero-content">
+
+                <div class="tag-pill">
+                    <i class="bi bi-stars"></i>
+                    Your personal productivity hub
+                </div>
+
+                <h1>
+                    Organize your day.<br>
+                    <em>Achieve more.</em>
+                </h1>
+
+                <p>
+                    Welcome to TaskFlow — your personal space to capture tasks,
+                    organize your plans, and keep track of what matters most.
+                    Start small, stay consistent, get things done.
+                </p>
+
+                <div class="cta-group">
+                    {% if session.user_id %}
+                        <a href="{{ '/todos' }}" class="cta-btn">
+                            <i class="bi bi-check2-circle"></i>
+                            My TODOs
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    {% else %}
+                        <a href="{{ '/register' }}" class="cta-btn">
+                            <i class="bi bi-check2-circle"></i>
+                            Get Started Free
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                        <a href="{{ '/login' }}" class="cta-secondary">
+                            Already have an account? <strong>Login →</strong>
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="trust-note">
+                    <i class="bi bi-shield-check"></i>
+                    Your tasks, your plans, your progress.
+                </div>
+
+                <div class="stats-strip">
+                    <div class="stat-item">
+                        <div class="stat-num">∞</div>
+                        <div class="stat-label">Tasks Supported</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num">100%</div>
+                        <div class="stat-label">Private & Yours</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num">24/7</div>
+                        <div class="stat-label">Always Available</div>
+                    </div>
+                </div>
+
+            </section>
+
+
+            <!-- Right: Animated illustration -->
+            <section class="illus-area" aria-hidden="true">
+
+                <div class="bg-circle"></div>
+
+                <div class="float-badge badge-one">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <div class="float-badge badge-two">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="float-badge badge-three">
+                    <i class="bi bi-calendar-event"></i>
+                </div>
+
+                <div class="demo-card" role="presentation">
+                    <div class="demo-card-head">
+                        <h3>My Daily Tasks</h3>
+                        <div class="demo-card-icon">
+                            <i class="bi bi-clipboard-check"></i>
+                        </div>
+                    </div>
+
+                    <div class="progress-track">
+                        <div class="progress-fill" id="demoBar"></div>
+                    </div>
+                    <div class="progress-label" id="demoLabel">0 of 4 tasks completed</div>
+
+                    <div class="demo-task" onclick="toggleDemo(this)">
+                        <div class="check-box"></div>
+                        <div class="task-info">
+                            <div class="task-name">Complete assignments</div>
+                            <div class="task-time"><i class="bi bi-clock"></i> 9:00 AM</div>
+                        </div>
+                    </div>
+                    <div class="demo-task" onclick="toggleDemo(this)">
+                        <div class="check-box"></div>
+                        <div class="task-info">
+                            <div class="task-name">Learn something new</div>
+                            <div class="task-time"><i class="bi bi-clock"></i> 11:00 AM</div>
+                        </div>
+                    </div>
+                    <div class="demo-task" onclick="toggleDemo(this)">
+                        <div class="check-box"></div>
+                        <div class="task-info">
+                            <div class="task-name">Work on my project</div>
+                            <div class="task-time"><i class="bi bi-clock"></i> 2:00 PM</div>
+                        </div>
+                    </div>
+                    <div class="demo-task" onclick="toggleDemo(this)">
+                        <div class="check-box"></div>
+                        <div class="task-info">
+                            <div class="task-name">Review today's progress</div>
+                            <div class="task-time"><i class="bi bi-clock"></i> 6:00 PM</div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+    </main>
+
+
+    <script>
+        function toggleDemo(task) {
+            task.classList.toggle('done');
+            const total = document.querySelectorAll('.demo-task').length;
+            const done  = document.querySelectorAll('.demo-task.done').length;
+            document.getElementById('demoBar').style.width = (done / total * 100) + '%';
+            document.getElementById('demoLabel').textContent = done + ' of ' + total + ' tasks completed';
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — TaskFlow</title>
+    <meta name="description" content="Log in to your TaskFlow account and manage your personal TODO list.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary:      #6558e8;
+            --primary-dark: #5143d1;
+            --primary-light:#eae7ff;
+            --bg:           #f4f6ff;
+            --surface:      #ffffff;
+            --border:       #e5e7f3;
+            --text:         #1e2340;
+            --text-muted:   #74798b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 6%;
+            height: 66px;
+        }
+
+        .navbar-brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary) !important;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link {
+            color: var(--text-muted) !important;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 7px 13px !important;
+            border-radius: 8px;
+            transition: all .2s;
+        }
+
+        .nav-link:hover { color: var(--primary) !important; background: var(--primary-light); }
+
+        /* Flash */
+        .flash-wrap { padding: 12px 6%; }
+        .flash-msg {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 18px; border-radius: 10px;
+            font-size: 14px; font-weight: 500; margin-bottom: 8px;
+        }
+        .flash-success { background:#ecfdf5; color:#15803d; border-left:4px solid #22c55e; }
+        .flash-error   { background:#fef2f2; color:#b91c1c; border-left:4px solid #ef4444; }
+        .flash-info    { background:#eff6ff; color:#1d4ed8; border-left:4px solid #3b82f6; }
+
+        /* Page layout */
+        .page-wrap {
+            min-height: calc(100vh - 66px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* Login card */
+        .login-box {
+            width: 100%;
+            max-width: 880px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: var(--surface);
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 16px 52px rgba(44,42,95,.1);
+        }
+
+        /* Left panel */
+        .panel-left {
+            background: linear-gradient(145deg, #6558e8 0%, #8b5cf6 100%);
+            padding: 56px 42px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .panel-left .icon-wrap {
+            width: 58px;
+            height: 58px;
+            background: rgba(255,255,255,.18);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            margin-bottom: 26px;
+        }
+
+        .panel-left h2 {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 16px;
+        }
+
+        .panel-left p {
+            font-size: 15px;
+            line-height: 1.8;
+            color: rgba(255,255,255,.8);
+            margin-bottom: 28px;
+        }
+
+        .panel-feature {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            font-size: 14px;
+            margin-bottom: 14px;
+            color: rgba(255,255,255,.9);
+        }
+
+        .panel-feature i { font-size: 18px; }
+
+        /* Right form */
+        .panel-right {
+            padding: 48px 42px;
+        }
+
+        .panel-right h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .form-sub {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #41465a;
+            margin-bottom: 7px;
+        }
+
+        .input-group-text {
+            background: #f8f7ff;
+            border: 1.5px solid var(--border);
+            border-right: none;
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .form-control {
+            border: 1.5px solid var(--border);
+            border-radius: 0 10px 10px 0 !important;
+            padding: 12px 14px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: all .2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(101,88,232,.14);
+        }
+
+        .input-group .input-group-text {
+            border-radius: 10px 0 0 10px;
+        }
+
+        .pw-toggle {
+            background: #f8f7ff;
+            border: 1.5px solid var(--border);
+            border-left: none;
+            border-radius: 0 10px 10px 0 !important;
+            color: var(--text-muted);
+            padding: 0 14px;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .pw-toggle:hover { background: var(--primary-light); color: var(--primary); }
+
+        .form-control.no-radius-right { border-radius: 10px 0 0 10px !important; }
+
+        .login-btn {
+            width: 100%;
+            padding: 13px;
+            background: var(--primary);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .login-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(101,88,232,.25);
+        }
+
+        .register-hint {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 22px;
+        }
+
+        .register-hint a {
+            color: var(--primary);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .register-hint a:hover { text-decoration: underline; }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .navbar { padding: 0 5%; }
+            .login-box { grid-template-columns: 1fr; }
+            .panel-left { padding: 30px 28px; }
+            .panel-right { padding: 32px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid px-0">
+            <a class="navbar-brand" href="{{ '/home' }}">
+                <i class="bi bi-check2-square"></i> TaskFlow
+            </a>
+            <ul class="navbar-nav ms-auto d-flex flex-row gap-1">
+                <li class="nav-item"><a class="nav-link" href="{{ '/home' }}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ '/about' }}">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Flash messages -->
+    {% if messages %}
+{% for item in messages %}
+<div class="alert alert-{{ item.category }} alert-dismissible fade show" role="alert">
+  {{ item.message }}
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endif %}
+
+    <main class="page-wrap">
+        <div class="login-box">
+
+            <!-- Left panel -->
+            <section class="panel-left">
+                <div class="icon-wrap">
+                    <i class="bi bi-check2-square"></i>
+                </div>
+                <h2>Welcome back!</h2>
+                <p>Log in to your TaskFlow account and pick up right where you left off.</p>
+
+                <div class="panel-feature">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>All your tasks in one place</span>
+                </div>
+                <div class="panel-feature">
+                    <i class="bi bi-lock-fill"></i>
+                    <span>Secure & private by default</span>
+                </div>
+                <div class="panel-feature">
+                    <i class="bi bi-lightning-fill"></i>
+                    <span>Fast and easy to use</span>
+                </div>
+            </section>
+
+            <!-- Right form -->
+            <section class="panel-right">
+                <h1>Sign In</h1>
+                <p class="form-sub">Enter your credentials to access your TODOs.</p>
+
+                <form action="{{ '/login' }}" method="POST" id="loginForm">
+
+                    <!-- Username -->
+                    <div class="mb-3">
+                        <label for="Username" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="Username"
+                                name="Username"
+                                placeholder="Enter your username"
+                                autocomplete="username"
+                                required>
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-4">
+                        <label for="Password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input
+                                type="password"
+                                class="form-control no-radius-right"
+                                id="Password"
+                                name="Password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required>
+                            <button type="button" class="pw-toggle" onclick="togglePw()" aria-label="Show password">
+                                <i class="bi bi-eye" id="pwIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-btn" id="loginBtn">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        Sign In
+                    </button>
+
+                </form>
+
+                <p class="register-hint">
+                    Don't have an account?
+                    <a href="{{ '/register' }}">Create one free →</a>
+                </p>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        function togglePw() {
+            const field = document.getElementById('Password');
+            const icon  = document.getElementById('pwIcon');
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                field.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function() {
+            const btn = document.getElementById('loginBtn');
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Signing in…';
+            btn.disabled = true;
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
